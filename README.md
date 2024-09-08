@@ -12,7 +12,9 @@ making it easier to automate and manage infrastructure changes across multiple s
    Deploy static websites to AWS S3 and invalidate CloudFront cache. This functionality is managed by 
    a script located in the `cmd/deploy/frontend/static` folder. 
    It handles the upload of files to S3 and invalidates the CloudFront cache to ensure changes are reflected immediately.
-
+2. [S3 Parallel Deployment](cmd/deploy/s3/README.md)
+   Upload files to an AWS S3 bucket in parallel. This functionality is managed by a script located in the `cmd/deploy/s3` folder. 
+   It uploads files to a specified S3 bucket in parallel, making the process faster and more efficient.
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
