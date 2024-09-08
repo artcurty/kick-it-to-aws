@@ -15,10 +15,11 @@ import (
 
 func TestUploadDirectoryToS3Batch(t *testing.T) {
 	type args struct {
-		awsConfig  *cloud.Config
-		localDir   string
-		s3BasePath string
-		s3Bucket   string
+		awsConfig          *cloud.Config
+		localDir           string
+		s3BasePath         string
+		s3Bucket           string
+		maxParallelUploads int
 	}
 	tests := []struct {
 		name         string
@@ -77,6 +78,85 @@ func TestUploadDirectoryToS3Batch(t *testing.T) {
 				localDir:   "testdata",
 				s3BasePath: "basepath",
 				s3Bucket:   "testbucket",
+			},
+			wantErr: true,
+			mockS3Client: func(m *mock.MockS3Client) {
+				m.EXPECT().PutObject(gomock.Any(), gomock.Any()).Return(nil, errors.New("upload error")).AnyTimes()
+			},
+			setup: func() (string, error) {
+				dir := "testdata"
+				err := os.Mkdir(dir, 0755)
+				if err != nil {
+					return "", err
+				}
+				file, err := os.Create(filepath.Join(dir, "testfile.txt"))
+				if err != nil {
+					return "", err
+				}
+				file.Close()
+				return dir, nil
+			},
+			teardown: func(dir string) error {
+				return os.RemoveAll(dir)
+			},
+		},
+		{
+			name: "Successful parallel upload",
+			args: args{
+				awsConfig:          &cloud.Config{Config: aws.Config{Region: "us-west-2"}},
+				localDir:           "testdata",
+				s3BasePath:         "basepath",
+				s3Bucket:           "testbucket",
+				maxParallelUploads: 2,
+			},
+			wantErr: false,
+			mockS3Client: func(m *mock.MockS3Client) {
+				m.EXPECT().PutObject(gomock.Any(), gomock.Any()).Return(&s3.PutObjectOutput{}, nil).AnyTimes()
+			},
+			setup: func() (string, error) {
+				dir := "testdata"
+				err := os.Mkdir(dir, 0755)
+				if err != nil {
+					return "", err
+				}
+				file, err := os.Create(filepath.Join(dir, "testfile1.txt"))
+				if err != nil {
+					return "", err
+				}
+				file.Close()
+				file, err = os.Create(filepath.Join(dir, "testfile2.txt"))
+				if err != nil {
+					return "", err
+				}
+				file.Close()
+				return dir, nil
+			},
+			teardown: func(dir string) error {
+				return os.RemoveAll(dir)
+			},
+		},
+		{
+			name: "Failed to fetch files",
+			args: args{
+				awsConfig:          &cloud.Config{Config: aws.Config{Region: "us-west-2"}},
+				localDir:           "invalidDir",
+				s3BasePath:         "basepath",
+				s3Bucket:           "testbucket",
+				maxParallelUploads: 2,
+			},
+			wantErr:      true,
+			mockS3Client: func(m *mock.MockS3Client) {},
+			setup:        func() (string, error) { return "", nil },
+			teardown:     func(dir string) error { return nil },
+		},
+		{
+			name: "Failed to upload file",
+			args: args{
+				awsConfig:          &cloud.Config{Config: aws.Config{Region: "us-west-2"}},
+				localDir:           "testdata",
+				s3BasePath:         "basepath",
+				s3Bucket:           "testbucket",
+				maxParallelUploads: 2,
 			},
 			wantErr: true,
 			mockS3Client: func(m *mock.MockS3Client) {

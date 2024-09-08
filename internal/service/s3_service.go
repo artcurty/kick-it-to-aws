@@ -3,14 +3,15 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/artcurty/kick-it-to-aws/internal/cloud"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"golang.org/x/sync/semaphore"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/artcurty/kick-it-to-aws/internal/cloud"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"sync"
 )
 
 type S3Client interface {
@@ -92,5 +93,52 @@ func uploadFile(s3Client S3Client, bucketName, s3Key, filePath string) error {
 	}
 
 	log.Printf("Successfully uploaded %s to S3 as %s", filePath, s3Key)
+	return nil
+}
+
+func UploadDirectoryToS3Parallel(awsConfig *cloud.Config, localDir string, s3BasePath string, s3Bucket string, maxParallelUploads int) error {
+	s3Client := s3ClientFactory(awsConfig.Config)
+	files, err := fetchFiles(localDir)
+	if err != nil {
+		return err
+	}
+
+	var wg sync.WaitGroup
+	errChan := make(chan error, 1)
+	sem := semaphore.NewWeighted(int64(maxParallelUploads))
+
+	for _, file := range files {
+		wg.Add(1)
+		if err := sem.Acquire(context.Background(), 1); err != nil {
+			return err
+		}
+		go func(filePath string) {
+			defer wg.Done()
+			defer sem.Release(1)
+			s3Key, err := buildS3Key(localDir, filePath, s3BasePath)
+			if err != nil {
+				errChan <- err
+				return
+			}
+
+			err = uploadFile(s3Client, s3Bucket, s3Key, filePath)
+			if err != nil {
+				errChan <- err
+			}
+		}(file)
+	}
+
+	go func() {
+		wg.Wait()
+		close(errChan)
+	}()
+
+	for err := range errChan {
+		if err != nil {
+			return err
+		}
+	}
+
+	log.Println("All files successfully uploaded to S3!")
 	return nil
 }
