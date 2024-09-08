@@ -18,7 +18,13 @@ Make sure to set the following environment variables before running the applicat
 | `S3_BUCKET`               | Name of the S3 bucket.                           | `my-bucket`                  |
 | `MAX_PARALLEL_UPLOADS`    | Maximum number of parallel uploads allowed.      | `5`                          |
 
-## Usage Example
+#### Lib using
+To use the kick-it-to-aws project as a library in your own Go project, follow these steps:
+```shell
+ go get github.com/artcurty/kick-it-to-aws
+```
+
+#### Pipeline using
 
 Here’s how you can use the static site deployment script in a CI pipeline like Drone CI:
 

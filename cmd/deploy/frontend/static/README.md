@@ -22,6 +22,14 @@ The following environment variables are required to configure the static site de
 
 ## Usage Example
 
+#### Lib using
+To use the kick-it-to-aws project as a library in your own Go project, follow these steps:
+Add the kick-it-to-aws module to your project:
+```shell
+ go get github.com/artcurty/kick-it-to-aws
+```
+
+#### Pipeline using
 Here’s how you can use the static site deployment script in a CI pipeline like Drone CI:
 
 ```yaml
