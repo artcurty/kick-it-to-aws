@@ -1,0 +1,20 @@
+kind: pipeline
+type: docker
+name: deploy
+
+steps:
+  - name: deploy
+    image: golang:1.16
+    environment:
+      AWS_ACCESS_KEY_ID:
+        from_secret: AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: AWS_SECRET_ACCESS_KEY
+      AWS_REGION: us-west-1
+      S3_BUCKET_NAME: my-s3-bucket
+      CLOUDFRONT_DISTRIBUTION_ID: E1234ABCDEF
+    commands:
+      - git clone https://github.com/artcurty/kick-it-to-aws.git
+      - cd kick-it-to-aws
+      - go build -o kick-it-to-aws cmd/deploy/frontend/static/main.go
+      - ./kick-it-to-aws
