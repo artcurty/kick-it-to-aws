@@ -18,7 +18,8 @@ Make sure to set the following environment variables before running the applicat
 | `S3_BUCKET`               | Name of the S3 bucket.                           | `my-bucket`                  |
 | `MAX_PARALLEL_UPLOADS`    | Maximum number of parallel uploads allowed.      | `5`                          |
 
-## Usage Example
+
+## Pipeline using
 
 Here’s how you can use the static site deployment script in a CI pipeline like Drone CI:
 

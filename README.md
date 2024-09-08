@@ -16,5 +16,12 @@ making it easier to automate and manage infrastructure changes across multiple s
    Upload files to an AWS S3 bucket in parallel. This functionality is managed by a script located in the `cmd/deploy/s3` folder. 
    It uploads files to a specified S3 bucket in parallel, making the process faster and more efficient.
 
+## Lib using
+To use the kick-it-to-aws project as a library in your own Go project, follow these steps:
+Add the kick-it-to-aws module to your project:
+```shell
+ go get github.com/artcurty/kick-it-to-aws
+```
+
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
