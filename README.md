@@ -1,5 +1,6 @@
+[![Go](https://github.com/artcurty/kick-it-to-aws/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/artcurty/kick-it-to-aws/actions/workflows/go.yml)
 
-# Kick-It-To-AWS
+# Kick-It-To-AWS 
 
 Kick-It-To-AWS is a Go-based project aimed at centralizing various deployment scripts for AWS. 
 The project is designed to provide a unified interface for different types of AWS deployments, 
